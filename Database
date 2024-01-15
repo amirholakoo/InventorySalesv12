@@ -1,0 +1,93 @@
+mysql -u [username] -p
+CREATE DATABASE PaperFactory;
+USE PaperFactory;
+
+CREATE TABLE Products (
+    ReelNumber VARCHAR(255) PRIMARY KEY,
+    GSM INT,
+    Width INT,
+    Length INT,
+    Grade VARCHAR(255),
+    Breaks VARCHAR(255),
+    Comments TEXT,
+    qrCode TEXT,
+    Location VARCHAR(255),
+    Status ENUM('In-Stock', 'Sold', 'Shipping', 'Delivered')
+);
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255),
+    DeliveryAddress TEXT,
+    Phone VARCHAR(20),
+    Status VARCHAR(255),
+    OrderHistory TEXT
+);
+CREATE TABLE Suppliers (
+    SupplierID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255),
+    DeliveryAddress TEXT,
+    Phone VARCHAR(20),
+    Status VARCHAR(255),
+    OrderHistory TEXT
+);
+CREATE TABLE RawMaterials (
+    MaterialID INT PRIMARY KEY AUTO_INCREMENT,
+    SupplierID INT,
+    MaterialName VARCHAR(255),
+    MaterialType VARCHAR(255),
+    Status VARCHAR(255),
+    Comments TEXT,
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID)
+);
+CREATE TABLE Shipments (
+    ShipmentID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerSupplierID INT,
+    TruckID INT,
+    ReelNumbers VARCHAR(255),
+    MaterialID INT,
+    SalesID INT,
+    PurchaseID INT,
+    EntryTime DATETIME,
+    Location ENUM('Entrance', 'Loading', 'Loaded', 'Unloading', 'Ready', 'Delivered') DEFAULT 'Entrance',
+    UnloadLocation VARCHAR(255),
+    Status ENUM('Incoming', 'Outgoing', 'Delivered'),
+    LoadedWeight DECIMAL(10,2),
+    UnloadedWeight DECIMAL(10,2),
+    ExitTime DATETIME,
+    Comments TEXT
+);
+CREATE TABLE Trucks (
+    TruckID INT PRIMARY KEY AUTO_INCREMENT,
+    LicenseNumber VARCHAR(255),
+    DriverName VARCHAR(255),
+    Phone VARCHAR(20),
+    Status VARCHAR(255),
+    Location VARCHAR(255)
+);
+CREATE TABLE Sales (
+    SaleID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT,
+    TruckID INT,
+    ShipmentID INT,
+    ReelNumbers VARCHAR(255),
+    SaleAmount DECIMAL(10,2),
+    NetWeight DECIMAL(10,2),
+    Date DATETIME,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (TruckID) REFERENCES Trucks(TruckID),
+    FOREIGN KEY (ShipmentID) REFERENCES Shipments(ShipmentID)
+);
+CREATE TABLE Purchases (
+    PurchaseID INT PRIMARY KEY AUTO_INCREMENT,
+    SupplierID INT,
+    TruckID INT,
+    ShipmentID INT,
+    MaterialID INT,
+    Cost DECIMAL(10,2),
+    NetWeight DECIMAL(10,2),
+    PurchaseDate DATETIME,
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID),
+    FOREIGN KEY (TruckID) REFERENCES Trucks(TruckID),
+    FOREIGN KEY (ShipmentID) REFERENCES Shipments(ShipmentID),
+    FOREIGN KEY (MaterialID) REFERENCES RawMaterials(MaterialID)
+);
